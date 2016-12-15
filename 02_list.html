@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<!--v-for用于列表渲染数据-->
+<!--基于数组-->
+<!--基于对象-->
+<!--基于对象的数组-->
+
+<!--label for v-show v-for 结合使用-->
+<!--过滤结果 | filterBy-->
+
+<!--自定义过滤-->
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="bootstrap.css">
+    <script src="vue.js"></script>
+    <title>列表展示</title>
+</head>
+<body>
+<div class="container">
+    <li v-for="i in 11" class="list-group-item">
+        {{ i }} X 10 就是 {{ 10*i }}
+    </li>
+
+    <!--<li class="list-group-item" v-for="story in stories">-->
+        <!--{{$index}} {{ story.writer }} 共写了 {{ story.length }}-->
+    <!--</li>-->
+    <li class="list-group-item" v-for="(index,story) in stories">
+        {{index}} {{story.writer}}共写了 {{story.length}}
+    </li>
+    <li class="list-group-item" v-for="(key,value) in yesman">
+        {{$index}} {{key}}共写了{{value}}
+    </li>
+
+    <li v-for="story in stories | filterBy 'Alex' in 'writer'" class="list-group-item">
+        {{ story.writer }} said "{{ story.plot }}"
+    </li>
+
+    <div class="form-group">
+        <label for="query">查询一下</label>
+        <input v-model="query" class="form-control">
+    </div>
+    <h3>搜索结果</h3>
+    <ul class="list-group">
+        <li v-show="query" v-for="story in stories | filterBy query in 'writer'" class="list-group-item">
+            {{story.writer}} 写了 "{{ story.length }}"
+        </li>
+    </ul>
+
+    <h3>按票数排序</h3>
+    <ul class="list-group">
+        <li v-for="story in stories | orderBy 'upvotes' order" class="list-group-item">
+            {{story.writer}} 写了 {{story.length }} 共有{{ story.upvotes }} 次
+        </li>
+    </ul>
+    <!--<button @click="reverse">逆向来一次</button>-->
+    <button @click="order = order * -1">逆向来一次</button>
+
+    <h3>畅销书</h3>
+    <ul class="list-group">
+        <li v-for="story in stories | famous" class="list-group-item">
+            {{story.writer}} 写了{{story.length}} 共有{{story.upvotes}}次数
+        </li>
+    </ul>
+    <pre>{{$data | json}}</pre>
+</div>
+</body>
+<script>
+    //    自定义过滤器,过滤器要在vue实例之前
+    Vue.filter('famous',function(stories){
+        return stories.filter(function(item){
+            return item.upvotes > 80;
+        });
+    });
+
+
+    new Vue({
+        el:'.container',
+        data:{
+            stories:[
+                {writer:'我',length:'4k',upvotes:78},
+                {writer:'你',length:'5k',upvotes:88},
+                {writer:'他',length:'2w',upvotes:99}
+            ],
+            yesman:{
+                "作者":"4w"
+            },
+            order:-1
+        },
+        methods:{
+//            reverse:function(){
+//                return this.order * -1;
+//            }
+        },
+        //upvotes可能会变更，使用computed动态监听
+        computed:{
+            famous:function(){
+                return this.stories.filter(function(item){
+                    return item.upvotes > 25;
+                });
+            }
+        }
+    });
+</script>
+</html>

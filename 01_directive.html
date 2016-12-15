@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--常用的指令 v-if/v-show/v-else       v-model      v-for -->
+<!--使用template将多个div包裹为一个判断条件-->
+<head>
+    <meta charset="UTF-8">
+    <title>指令</title>
+    <script src="vue.js"></script>
+</head>
+<body>
+    <div id="app">
+        <textarea v-model="message"></textarea>
+        <button v-show="message">v-show（display:none)显示不显示</button>
+        <button v-if="message">v-if(移除dom节点)显示不显示</button>
+        <pre>{{$data | json}}</pre>
+
+        <template v-if="!message">
+            <div>清空后就剩下你</div>
+            <div>还是你</div>
+            <div>同样是你</div>
+        </template>
+        <template v-else>
+            又不不
+        </template>
+    </div>
+</body>
+
+<script>
+    new Vue({
+        el:"#app",
+        data:{
+            message:"我来早了"
+        }
+    })
+</script>
+</html>

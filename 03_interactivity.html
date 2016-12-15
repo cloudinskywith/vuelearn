@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<!--事件处理-->
+<!--页面加载完成-->
+<!--输入框变更-->
+<!--按钮点击-->
+<!--表单提交-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="bootstrap.css">
+    <script src="vue.js"></script>
+    <title>交互</title>
+</head>
+<body>
+<div class="container">
+    <button @click="single++" class="btn btn-primary">
+        增加 {{single}}
+    </button>
+    <button @click="upvote" class="btn btn-primary">
+        用方法增加{{upvotes}}
+    </button>
+
+    <form class="form-inline">
+        <input v-model="a" number class="form-control">
+        <select v-model="operator" class="form-control">
+            <option selected>+</option>
+            <option>-</option>
+            <option>*</option>
+            <option>/</option>
+        </select>
+        <input v-model="b" number class="form-control">
+        <button type="submit" @click.prevent="calculate" class="btn btn-primary">
+            计算
+        </button>
+    </form>
+
+    <h2>结果{{a}} {{operator}} {{b}} = {{c}}</h2>
+    <pre>
+        {{$data | json }}
+    </pre>
+</div>
+</body>
+
+<script>
+    new Vue({
+        el:".container",
+        data:{
+            single:0,
+            upvotes:0,
+            a:1,
+            b:2,
+            c:null,
+            operator:" "
+        },
+        methods:{
+            upvote:function(){
+                return this.upvotes++;
+            },
+            calculate:function(){
+                switch(this.operator){
+                    case "+":
+                        this.c  = this.a + this.b;
+                        break;
+                    case "-":
+                        this.c = this.a - this.b;
+                        break;
+                    case "*":
+                        this.c = this.a * this.b;
+                        break;
+                    case "/":
+                        this.c = this.a + this.b;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        },
+        computed: {
+            c:function(){
+                return this.a + this.b;
+            }
+        }
+    })
+</script>
+</html>
