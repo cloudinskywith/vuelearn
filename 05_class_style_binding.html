@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<!--对元素的class和style进行操作也是常见的业务场景
+此时可以用v-bind:class来实现
+-->
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.css">
+    <script src="vue.js"></script>
+    <title>绑定</title>
+
+    <style>
+        .body-red:{
+            background-color: #ff0000;
+        }
+        .body-blue:{
+            background-color: #2e6da4;
+        }
+        .completed{
+            text-decoration: line-through;
+        }
+    </style>
+</head>
+<!--<body :class="{ 'body-red':color,'body-blue' : !color }">-->
+<body :class="[color ? 'body-red':'body-blue']">
+    <button @click="flipColor" class="btn">
+        变更颜色
+    </button>
+    <div :style="{'color':niceStyle.color,fontSize:niceStyle.fontSize}">写点啥</div>
+
+    <ul>
+        <li :class="{'completed':task.done}" :style="styleObject" v-for="task in tasks">
+            {{task.body}}
+            <button @click="completeTask(task)" class="btn">
+                刚做完
+            </button>
+        </li>
+    </ul>
+</body>
+<script>
+    new Vue({
+        el:'body',
+        data:{
+            color:true,
+            niceStyle:{
+                color:'blue',
+                fontSize:'20px'
+            },
+            tasks:[
+                {body:"喂牛",done:true},
+                {body:"喂马",done:true},
+                {body:"为毛",done:false}
+            ],
+            styleObject:{
+                fontSize:'25px'
+            }
+        },
+        methods:{
+            flipColor:function(){
+                this.color = !this.color;
+            },
+            completeTask:function(task){
+                task.done = !task.done;
+            }
+        }
+    });
+</script>
+</html>
