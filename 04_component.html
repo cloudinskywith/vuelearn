@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<!--组件必须在实例之前
+Vue.component('name',{}
+new Vue({})
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.css">
+    <script src="vue.js"></script>
+    <title>组件</title>
+</head>
+<body>
+<div>玩玩</div>
+<div class="container">
+    <story plot="第一个"></story>
+    <story plot="第二个"></story>
+    <story plot="第三个"></story>
+
+    <!--另一种比较混乱的写法-->
+    <!--<inline-story v-bind:storyee="{writer:'你',plot:'2k'}"></inline-story>-->
+    <!--<inline-story v-bind:storyee="{writer:'我',plot:'3k'}"></inline-story>-->
+    <!--<inline-story v-bind:storyee="{writer:'他',plot:'4k'}"></inline-story>-->
+    <!--还是上面的例子，不过用v-for-->
+    <div class="list-group-item" v-for="storyee in stories">
+        <inline-story v-bind:storyee="storyee"></inline-story>
+    </div>
+
+    <!--因为没有配置.sync，favorite值一直是空的 -->
+    <ul class="list-group">
+        <my-article v-for="article in articles"
+                    :article="article"
+                    :favorite.sync="favorite">
+        </my-article>
+    </ul>
+
+    {{ $data | json }}
+</div>
+</body>
+
+<template id="story-template">
+    <h1>{{ plot }}</h1>
+</template>
+
+<template id="inline-story-template">
+    <h1>{{storyee.writer}} 说 {{storyee.plot}}</h1>
+</template>
+
+<template id="two-way-article-template">
+    <li class="list-group-item">
+        {{article.writer}} 写了 {{article.plot}} 被顶了{{article.upvotes}}次
+        <button class="btn btn-primary" v-show="!article.voted" @click="upvote">
+            投票
+        </button>
+        <button class="btn btn-primary" v-show="!isFavorite" @click="setFavorite">
+            最佳
+        </button>
+        <span v-show="isFavorite" class="glyphicon glyphicon-star pull-right" aria-hidden="true"></span>
+    </li>
+</template>
+<script>
+    Vue.component('inline-story',{
+        template:'#inline-story-template',
+        props:['storyee']  //v-bind的用法就是：props是个对象，在组件中可以对其取属性 一般是:story="story"  v-bind值=属性值=模板中的变量
+    })
+    Vue.component('story', {
+        template: '#story-template',
+        props: ['plot']
+    });
+    Vue.component('my-article',{
+        template:'#two-way-article-template',
+        props:['article','favorite'],
+        methods:{
+            upvote:function(){
+                this.article.upvotes += 1;
+                this.article.voted = true;
+            },
+            setFavorite:function(){
+                this.favorite = this.article;
+            }
+        },
+        computed:{
+            isFavorite:function(){
+                return this.article == this.favorite;
+            }
+        }
+    });
+    new Vue({
+        el: '.container',
+        data:{
+            stories:[
+                {writer:'你',plot:'3k'},
+                {writer:'我',plot:'4k'},
+                {writer:'他',plot:'5k'}
+            ],
+            articles:[
+                {writer:'我',plot:'3k',upvotes:28,voted:false},
+                {writer:'你',plot:'4k',upvotes:8,voted:false},
+                {writer:'他',plot:'9k',upvotes:49,voted:false},
+                {writer:'它',plot:'6k',upvotes:33,voted:false}
+            ],
+            favorite:{}
+        },
+    });
+
+
+
+</script>
+</html>
