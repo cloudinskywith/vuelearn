@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--使用vue-resources替代jQuery-->
+<head>
+    <meta charset="UTF-8">
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/vue/1.0.26/vue.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.css">
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.js"></script>-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/1.0.3/vue-resource.js"></script>
+    <title>CRUD</title>
+</head>
+<body>
+<!--<div id="app">-->
+<!--<div class="container">-->
+<!--<h1>说点故事</h1>-->
+<!--<ul class="list-group">-->
+<!--<my-story v-for="story in stories" :story="story"></my-story>-->
+<!--</ul>-->
+<!--<pre>{{$data | json}}</pre>-->
+<!--</div>-->
+<!--</div>-->
+<!--<template id="template-story-raw">-->
+<!--<li class="list-group-item">-->
+<!--{{story.writer}} 说了故事 {{story.plot}}-->
+<!--<span>{{ story.upvotes }}</span>-->
+<!--</li>-->
+<!--</template>-->
+
+<!--对上面的例子进行改造-->
+<h1>故事</h1>
+<div id="app">
+    <div class="pagination">
+        <button class="btn btn-default" @click="fetchStories(prev_page_url)" :disabled="!pagination.prev_page_url">
+            上一页
+        </button>
+        <span>当前页面{{pagination.current_page}} 共有{{pagination.last_page}}</span>
+        <button class="btn btn-default" @click="fetchStories(pagination.next_page_url)" :disabled="!pagination.next_page_url">
+            下一页
+        </button>
+    </div>
+    <table class="table table-striped">
+        <tr>
+            <th>#</th>
+            <th>Plot</th>
+            <th>Writer</th>
+            <th>Upvotes</th>
+            <th>Actions</th>
+        </tr>
+        <!--<my-story v-for="story in stories" :story="story"></my-story>-->
+        <tr v-for="story in stories" is="story" :story="story"></tr>
+    </table>
+    <template id="template-story-raw">
+        <tr>
+            <td>{{story.id}}</td>
+            <td class="col-md-6">
+                <input v-if="story.editing" v-model="story.plot" class="form-control"/>
+                <span v-else>
+                    {{story.plot}}
+                </span>
+            </td>
+            <td>
+                <input v-if="story.editing" v-model="story.writer" class="form-control"/>
+                <span v-else>
+                    {{story.writer}}
+                </span>
+            </td>
+            <td>{{story.upvotes}}</td>
+            <td>
+                <div v-if="!story.editing" class="btn-group">
+                    <button class="btn btn-primary" @click="upvoteStory(story)">
+                        投票
+                    </button>
+                    <button class="btn btn-danger" @click="deleteStory(story)">
+                        删除
+                    </button>
+                    <button class="btn btn-default" @click="editStory(story)">
+                        修改
+                    </button>
+                </div>
+                <div v-else class="btn-group">
+                    <button v-if="story.id" class="btn btn-primary" @click="updateStory(story)">
+                        更新故事
+                    </button>
+                    <button v-else class="btn btn-success" @click="storeStory(story)">
+                        保存
+                    </button>
+                    <button class="btn btn-default" @click="story.editing=false">
+                        取消
+                    </button>
+                </div>
+            </td>
+        </tr>
+    </template>
+    <p class="lead text-center">所有的故事
+        <button @click="createStory()" class="btn btn-primary">
+            增加故事
+        </button>
+    </p>
+</div>
+</body>
+
+<script>
+    Vue.component('story', {
+        template: "#template-story-raw",
+        props: ['story'],
+        methods: {
+//            upvoteStory:function(story){
+//                story.upvotes ++;
+//                $.ajax({
+//                    url:'/api/stories/' + story.id,
+//                    type:'PATCH',
+//                    data:story,
+//                });
+//            },
+//            deleteStory:function(story){
+//                vm.stories.$remove(story); //假删除，从dom中删除
+//                $.ajax({
+//                    url:'/api/stories/' + story.id,
+//                    type:'DELETE',
+//                });
+//            }
+            upvoteStory: function (story) {
+                story.upvotes++;
+                this.$http.patch('/api/stories/' + story.id, story)
+            },
+            deleteStory: function (story) {
+                this.$parent.stories.$remove(story);
+                this.$http.delete('/api/stories/' + story.id)
+            },
+            editStory: function (story) {
+                story.editing = true;
+            },
+            updateStory:function(story){
+                this.$http.patch('/api/stories/' + story.id,story)
+                story.editing = false;
+            },
+            storeStory:function(story){
+                this.$http.post('/api/stories/',story).then(function(response){
+//                    story.editing = false;
+//                    vm.fetchStories();
+                    Vue.set(story,'id',response.data.id);
+                    story.editing = false;
+                });
+            },
+        }
+    });
+
+    new Vue({
+        el: "#app",
+        data: {
+            stories: []
+        },
+//        ready:function(){
+//            $.get('/api/stories',function(data){
+//                vm.stories = data;
+//            });
+//        }
+        ready: function () {    //这种写法也是可以的
+//            $.get('/api/stories',function(data){
+//                this.stories = data;
+//            }.bind(this));
+//            this.$http({url: '/api/stories', method: 'GET'}).then(function (response) {
+//                this.$set('stories', response.data)
+//            });
+//            因为使用了运行时的story.editing属性（story.editing不是story自身值），所以需要使用Vue.set,将上面的代码打补丁为下面的
+            this.fetchStories();
+        },
+        methods:{
+            createStory:function(){
+                var newStory = {
+                    plot:"",
+                    upvotes:0,
+                    editing:true
+                };
+                this.stories.push(newStory);
+            },
+            fetchStories:function(page_url){
+                var vm = this;
+                page_url = page_url || '/api/stories';
+                this.$http.get(page_url)
+                        .then(function(response){
+                            var storiesReady = response.data.data.map(function(story){
+                                story.editing = false;
+                                return story;
+                            });
+                            vm.makePagination(response.data);
+                            vm.$set('stories',storiesReady);
+                });
+            },
+            makePagination(data){
+                var pagination = {
+                    current_page: data.current_page,
+                    last_page: data.last_page,
+                    next_page_url: data.next_page_url,
+                    prev_page_url: data.prev_page_url
+                };
+                this.$set('pagination',pagination);
+            }
+        },
+    })
+</script>
+</html>
