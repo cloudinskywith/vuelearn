@@ -3,7 +3,7 @@
 <!--使用vue-resources替代jQuery-->
 <head>
     <meta charset="UTF-8">
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/vue/1.0.26/vue.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/vue/1.0.26/vue.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.css">
     <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.js"></script>-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/1.0.3/vue-resource.js"></script>
@@ -148,7 +148,8 @@
     new Vue({
         el: "#app",
         data: {
-            stories: []
+            stories: [],
+            pagination:"" //解决控制台报错的问题（有啥变量要用的，最好是初始化一下
         },
 //        ready:function(){
 //            $.get('/api/stories',function(data){
